@@ -25,8 +25,7 @@ load_dotenv()
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 GROUP_CHAT_ID = int(os.environ.get("GROUP_CHAT_ID", "-1003920885751"))
-GROUP_TOPIC_ID = os.environ.get("GROUP_TOPIC_ID")
-GROUP_TOPIC_ID = int(GROUP_TOPIC_ID) if GROUP_TOPIC_ID else None
+GROUP_TOPIC_ID = int(os.environ.get("GROUP_TOPIC_ID", "87"))
 CARD_NUMBER = os.environ.get("CARD_NUMBER", "5614 6835 1146 7011")
 CARD_HOLDER = os.environ.get("CARD_HOLDER", "Xamrayev Dilshodjon")
 DEPOSIT_AMOUNT = int(os.environ.get("DEPOSIT_AMOUNT", "100000"))
