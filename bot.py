@@ -25,6 +25,8 @@ load_dotenv()
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 GROUP_CHAT_ID = int(os.environ.get("GROUP_CHAT_ID", "-1003920885751"))
+GROUP_TOPIC_ID = os.environ.get("GROUP_TOPIC_ID")
+GROUP_TOPIC_ID = int(GROUP_TOPIC_ID) if GROUP_TOPIC_ID else None
 CARD_NUMBER = os.environ.get("CARD_NUMBER", "5614 6835 1146 7011")
 CARD_HOLDER = os.environ.get("CARD_HOLDER", "Xamrayev Dilshodjon")
 DEPOSIT_AMOUNT = int(os.environ.get("DEPOSIT_AMOUNT", "100000"))
@@ -52,6 +54,11 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 router = Router()
 dp.include_router(router)
+
+# The bot must never respond to messages in the team group — booking conversations
+# only happen in a private chat with the bot. Callback buttons (confirm/reject) are
+# unaffected since those are handled by callback_query handlers, not message handlers.
+router.message.filter(F.chat.type == "private")
 
 
 class Booking(StatesGroup):
@@ -271,6 +278,7 @@ async def on_proof_received(message: Message, state: FSMContext, bot: Bot):
         caption=caption,
         parse_mode="HTML",
         reply_markup=confirm_keyboard(booking_id),
+        message_thread_id=GROUP_TOPIC_ID,
     )
     db.attach_receipt(booking_id, photo.file_id, GROUP_CHAT_ID, sent.message_id)
 
