@@ -32,9 +32,15 @@ STUDIO_ADDRESS = os.environ.get("STUDIO_ADDRESS", "Toshkent shahri, Binokor ko'c
 MANAGER_USERNAME = os.environ.get("MANAGER_USERNAME", "kadr_studio_menejer")
 
 ROOMS = {
-    "white": {"label": "🤍 White zona", "price": 300_000},
-    "black": {"label": "🖤 Black zona", "price": 400_000},
+    "white": {"label": "🤍 White zona", "price_per_hour": 300_000},
+    "black": {"label": "🖤 Black zona", "price_per_hour": 400_000},
 }
+
+
+def hours_between(start_time: str, end_time: str) -> float:
+    sh, sm = (int(x) for x in start_time.split(":"))
+    eh, em = (int(x) for x in end_time.split(":"))
+    return ((eh * 60 + em) - (sh * 60 + sm)) / 60
 
 STUDIO_OPEN = "08:00"
 STUDIO_CLOSE = "23:00"
@@ -58,7 +64,7 @@ class Booking(StatesGroup):
 def room_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text=f"{r['label']} — {r['price']:,} so'm".replace(",", " "),
+            text=f"{r['label']} — {r['price_per_hour']:,} so'm/soat".replace(",", " "),
             callback_data=f"room:{key}",
         )]
         for key, r in ROOMS.items()
@@ -134,7 +140,7 @@ async def cmd_start(message: Message, state: FSMContext, command: CommandObject)
         await state.set_state(Booking.choosing_date)
         r = ROOMS[payload]
         await message.answer(
-            f"Siz tanladingiz: <b>{r['label']}</b> — {fmt_money(r['price'])} / smena\n\n"
+            f"Siz tanladingiz: <b>{r['label']}</b> — {fmt_money(r['price_per_hour'])} / soat\n\n"
             "📅 Qaysi sanaga bron qilmoqchisiz?\n"
             "Masalan: <code>25.07</code>",
             parse_mode="HTML",
@@ -156,7 +162,7 @@ async def on_room_chosen(callback: CallbackQuery, state: FSMContext):
     await state.update_data(room=room_key)
     await state.set_state(Booking.choosing_date)
     r = ROOMS[room_key]
-    await callback.message.edit_text(f"Siz tanladingiz: {r['label']} — {fmt_money(r['price'])} / smena")
+    await callback.message.edit_text(f"Siz tanladingiz: {r['label']} — {fmt_money(r['price_per_hour'])} / soat")
     await callback.message.answer(
         "📅 Qaysi sanaga bron qilmoqchisiz?\nMasalan: <code>25.07</code>",
         parse_mode="HTML",
@@ -210,16 +216,19 @@ async def on_time_input(message: Message, state: FSMContext):
         )
         return
 
-    await state.update_data(start_time=start_time, end_time=end_time)
+    duration = hours_between(start_time, end_time)
+    total_price = round(duration * ROOMS[room_key]["price_per_hour"])
+    await state.update_data(start_time=start_time, end_time=end_time, total_price=total_price)
     r = ROOMS[room_key]
     await state.set_state(Booking.awaiting_proof)
 
+    duration_label = f"{duration:g} soat"
     summary = (
         "✅ <b>Bu vaqt bo'sh!</b>\n\n"
         f"🏠 Zona: {r['label']}\n"
         f"📅 Sana: {data['booking_date_human']}\n"
-        f"🕐 Vaqt: {start_time}–{end_time}\n"
-        f"💰 Umumiy narx: {fmt_money(r['price'])}\n\n"
+        f"🕐 Vaqt: {start_time}–{end_time} ({duration_label})\n"
+        f"💰 Umumiy narx: {fmt_money(total_price)} ({fmt_money(r['price_per_hour'])}/soat)\n\n"
         f"Joyni ushlab turish uchun <b>minimal {fmt_money(DEPOSIT_AMOUNT)} avans</b> to'lashingiz kerak:\n\n"
         f"💳 Karta: <code>{CARD_NUMBER}</code>\n"
         f"👤 Karta egasi: {CARD_HOLDER}\n\n"
@@ -252,7 +261,7 @@ async def on_proof_received(message: Message, state: FSMContext, bot: Bot):
         f"🏠 Zona: {r['label']}\n"
         f"📅 Sana: {data['booking_date_human']}\n"
         f"🕐 Vaqt: {data['start_time']}–{data['end_time']}\n"
-        f"💰 Narx: {fmt_money(r['price'])} (avans: {fmt_money(DEPOSIT_AMOUNT)})\n\n"
+        f"💰 Narx: {fmt_money(data['total_price'])} (avans: {fmt_money(DEPOSIT_AMOUNT)})\n\n"
         f"Bron ID: #{booking_id}"
     )
     photo = message.photo[-1]
