@@ -28,7 +28,7 @@ GROUP_CHAT_ID = int(os.environ["GROUP_CHAT_ID"])
 CARD_NUMBER = os.environ.get("CARD_NUMBER", "KARTA RAQAMI KIRITILMAGAN")
 CARD_HOLDER = os.environ.get("CARD_HOLDER", "F.I.SH KIRITILMAGAN")
 DEPOSIT_AMOUNT = int(os.environ.get("DEPOSIT_AMOUNT", "100000"))
-STUDIO_ADDRESS = os.environ.get("STUDIO_ADDRESS", "Manzil so'rov asosida yuboriladi")
+STUDIO_ADDRESS = os.environ.get("STUDIO_ADDRESS", "Toshkent shahri, Binokor ko'chasi 69")
 MANAGER_USERNAME = os.environ.get("MANAGER_USERNAME", "kadr_studio_menejer")
 
 ROOMS = {
