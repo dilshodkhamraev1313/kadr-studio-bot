@@ -355,10 +355,31 @@ async def fallback(message: Message, state: FSMContext):
         )
 
 
+async def run_healthcheck_server():
+    """Tiny HTTP server so Render's free Web Service tier accepts this process
+    (it requires binding to $PORT) and so an external uptime pinger can keep it awake."""
+    from aiohttp import web
+
+    async def health(request):
+        return web.Response(text="Kadr Studio bot is running")
+
+    app = web.Application()
+    app.router.add_get("/", health)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", "8080"))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    logger.info("Healthcheck server listening on port %s", port)
+
+
 async def main():
     db.init_db()
     logger.info("Kadr Studio booking bot starting...")
-    await dp.start_polling(bot)
+    await asyncio.gather(
+        run_healthcheck_server(),
+        dp.start_polling(bot),
+    )
 
 
 if __name__ == "__main__":
