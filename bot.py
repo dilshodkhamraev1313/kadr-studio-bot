@@ -24,7 +24,7 @@ import db
 load_dotenv()
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
-GROUP_CHAT_ID = int(os.environ["GROUP_CHAT_ID"])
+GROUP_CHAT_ID = int(os.environ.get("GROUP_CHAT_ID", "-1003920885751"))
 CARD_NUMBER = os.environ.get("CARD_NUMBER", "5614 6835 1146 7011")
 CARD_HOLDER = os.environ.get("CARD_HOLDER", "Xamrayev Dilshodjon")
 DEPOSIT_AMOUNT = int(os.environ.get("DEPOSIT_AMOUNT", "100000"))
