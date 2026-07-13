@@ -25,8 +25,8 @@ load_dotenv()
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 GROUP_CHAT_ID = int(os.environ["GROUP_CHAT_ID"])
-CARD_NUMBER = os.environ.get("CARD_NUMBER", "KARTA RAQAMI KIRITILMAGAN")
-CARD_HOLDER = os.environ.get("CARD_HOLDER", "F.I.SH KIRITILMAGAN")
+CARD_NUMBER = os.environ.get("CARD_NUMBER", "5614 6835 1146 7011")
+CARD_HOLDER = os.environ.get("CARD_HOLDER", "Xamrayev Dilshodjon")
 DEPOSIT_AMOUNT = int(os.environ.get("DEPOSIT_AMOUNT", "100000"))
 STUDIO_ADDRESS = os.environ.get("STUDIO_ADDRESS", "Toshkent shahri, Binokor ko'chasi 69")
 MANAGER_USERNAME = os.environ.get("MANAGER_USERNAME", "kadr_studio_menejer")
